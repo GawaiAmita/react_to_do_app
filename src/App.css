@@ -440,6 +440,7 @@ body {
 @media (max-width: 600px) {
   body {
     padding: 1rem;
+    background-position: right;
   }
 
   .App {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
-import axios from 'axios';
+ import './App.css';
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -10,33 +9,24 @@ function App() {
   const [selectedTasks, setSelectedTasks] = useState([]);
 
   useEffect(() => {
-    fetchTasks();
+    // Retrieve tasks from local storage
+    const storedTasks = localStorage.getItem('tasks');
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
   }, []);
 
-  const fetchTasks = async () => {
-    try {
-      const response = await axios.get('https://jsonplaceholder.typicode.com/todos');
-      const fetchedTasks = response.data;
-      setTasks(fetchedTasks);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    }
+  useEffect(() => {
+    // Save tasks to local storage whenever it changes
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  // Handle input change in the task input field
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
   };
 
-  const addTask = async (task) => {
-    try {
-      const response = await axios.post('https://jsonplaceholder.typicode.com/todos', {
-        title: task,
-        completed: false,
-      });
-      const newTask = response.data;
-      setTasks([...tasks, newTask]);
-      setInputValue('');
-    } catch (error) {
-      console.error('Error adding task:', error);
-    }
-  };
-
+  // Handle form submission to add a new task
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputValue.trim() === '') {
@@ -50,21 +40,18 @@ function App() {
       return;
     }
 
-    addTask(inputValue);
     setTasks([...tasks, { task: inputValue, completed: false, editMode: false }]);
     setInputValue('');
   };
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-  };
-
+  // Handle editing a task
   const handleTaskEdit = (index) => {
     const updatedTasks = [...tasks];
     updatedTasks[index].editMode = true;
     setTasks(updatedTasks);
   };
 
+  // Handle saving an edited task
   const handleTaskSave = (index, newTask) => {
     const updatedTasks = [...tasks];
     updatedTasks[index].task = newTask;
@@ -72,12 +59,14 @@ function App() {
     setTasks(updatedTasks);
   };
 
+  // Handle canceling an edit for a task
   const handleTaskCancel = (index) => {
     const updatedTasks = [...tasks];
     updatedTasks[index].editMode = false;
     setTasks(updatedTasks);
   };
 
+  // Handle deleting a task
   const handleTaskDelete = (index) => {
     if (showCompletedTasks) {
       const updatedCompletedTasks = [...completedTasks];
@@ -90,28 +79,35 @@ function App() {
     }
   };
 
+  // Handle marking a task as complete
   const handleTaskComplete = (index) => {
     const completedTask = tasks[index];
     const updatedTasks = tasks.filter((task, i) => i !== index);
     setTasks(updatedTasks);
+
     setCompletedTasks([...completedTasks, completedTask]);
   };
 
+  // Handle marking a task as incomplete
   const handleTaskIncomplete = (index) => {
     const incompleteTask = completedTasks[index];
     const updatedCompletedTasks = completedTasks.filter((task, i) => i !== index);
     setCompletedTasks(updatedCompletedTasks);
+
     setTasks([...tasks, incompleteTask]);
   };
 
+  // Toggle display of completed tasks
   const handleToggleCompletedTasks = () => {
     setShowCompletedTasks(!showCompletedTasks);
   };
 
+  // Handle going back to the tasks list from completed tasks
   const handleBackToTasks = () => {
     setShowCompletedTasks(false);
   };
 
+  // Handle selecting/deselecting a task
   const handleTaskSelection = (index) => {
     const selectedTaskIndex = selectedTasks.indexOf(index);
     if (selectedTaskIndex === -1) {
@@ -123,12 +119,14 @@ function App() {
     }
   };
 
+  // Handle deleting selected tasks
   const handleDeleteSelectedTasks = () => {
     const updatedTasks = tasks.filter((_, index) => !selectedTasks.includes(index));
     setTasks(updatedTasks);
     setSelectedTasks([]);
   };
 
+  // Handle marking selected tasks as completed
   const handleMarkSelectedTasksCompleted = () => {
     const updatedTasks = tasks.filter((_, index) => !selectedTasks.includes(index));
     const selectedTasksData = tasks.filter((_, index) => selectedTasks.includes(index));
@@ -188,7 +186,7 @@ function App() {
                           }}
                         />
                       ) : (
-                        <span>{task.title}</span>
+                        <span>{task.task}</span>
                       )}
                     </div>
                     <div className="actions">
@@ -245,44 +243,25 @@ function App() {
                   </div>
                 ))}
               </div>
-              <div className="task-actions">
-                {selectedTasks.length > 0 && (
-                  <div>
-                    <button
-                      className="delete-selected"
-                      onClick={handleDeleteSelectedTasks}
-                    >
-                      Delete Selected
-                    </button>
-                    <button
-                      className="mark-selected"
-                      onClick={handleMarkSelectedTasksCompleted}
-                    >
-                      Mark as Complete
-                    </button>
-                  </div>
-                )}
-                <button
-                  className="toggle-completed"
-                  onClick={handleToggleCompletedTasks}
-                >
-                  Show Completed Tasks
-                </button>
-              </div>
             </div>
           )}
-
           {showCompletedTasks && (
             <div>
-              <h2 className="headingTasks">
-                <i className="fa-sharp fa-solid fa-check"></i>
+              <h2 className="headingCompletedTasks">
+                <i className="fa-sharp fa-solid fa-check-circle"></i>
                 &nbsp; Completed Tasks
               </h2>
               <div id="completed-tasks">
                 {completedTasks.map((task, index) => (
                   <div className="task" key={index}>
                     <div className="content">
-                      <span>{task.title}</span>
+                      <input
+                        className='check'
+                        type="checkbox"
+                        checked={selectedTasks.includes(index)}
+                        onChange={() => handleTaskSelection(index)}
+                      />
+                      <span className="completed">{task.task}</span>
                     </div>
                     <div className="actions">
                       <button
@@ -301,13 +280,44 @@ function App() {
                   </div>
                 ))}
               </div>
-              <button className="back" onClick={handleBackToTasks}>
-                Back to Tasks
+              <button
+                className="back"
+                onClick={handleBackToTasks}
+              >
+                Back 
               </button>
             </div>
           )}
         </section>
       </main>
+      <footer>
+        <div className="actions">
+          <button
+            className="toggle-completed"
+            onClick={handleToggleCompletedTasks}
+          >
+              {showCompletedTasks ? 'Hide Completed Tasks' : 'Completed Tasks'}
+          </button>
+          {selectedTasks.length > 0 && (
+            <div>
+              <button
+                className="delete-selected"
+                onClick={handleDeleteSelectedTasks}
+              >
+                Delete All
+              </button>
+              {!showCompletedTasks && (
+                <button
+                  className="mark-selected-completed"
+                  onClick={handleMarkSelectedTasksCompleted}
+                >
+                  Mark as Completed
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </footer>
     </div>
   );
 }

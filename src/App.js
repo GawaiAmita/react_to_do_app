@@ -308,7 +308,7 @@ function App() {
               </button>
               {!showCompletedTasks && (
                 <button
-                  className="mark-selected-completed"
+                  className="mark-selected"
                   onClick={handleMarkSelectedTasksCompleted}
                 >
                   Mark as Completed

@@ -273,7 +273,7 @@ body {
   margin-top: 2rem;
   cursor: pointer;
 }
-.mark-selected-completed {
+.mark-selected {
   background: transparent;
   color:  rgba(125, 2, 64, 0.849);
   padding: 0.8rem 1.3rem;
@@ -286,7 +286,7 @@ body {
 }
 
 .delete-selected:hover,
-.mark-selected-completed:hover {
+.mark-selected:hover {
   filter: brightness(1.2);
   background-color: rgba(125, 2, 64, 0.849);
   opacity: 0.8;
@@ -415,13 +415,23 @@ body {
 
 
 /* style for text when save button is active */
+
 .text {
   font-size: 1.3rem;
   font-weight: 500;
   margin-left: 1rem;
-  border: none; /* Hide the border */
-  background-color: transparent; /* Set the background color as transparent */
+  border: none;
+  background-color: transparent;
+  color: #000; /* Add a color to make the text visible */
 }
+.text.active {
+  color: black;
+}
+
+
+
+
+
 
 
 
